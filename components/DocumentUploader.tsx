@@ -44,7 +44,10 @@ export default function DocumentUploader({ onUploadSuccess }: DocumentUploaderPr
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || "Failed to upload document");
+          const errorMessage = data.details
+            ? `${data.error}: ${data.details}`
+            : data.error || "Failed to upload document";
+          throw new Error(errorMessage);
         }
 
         setUploadProgress("Extraction complete!");
@@ -56,7 +59,9 @@ export default function DocumentUploader({ onUploadSuccess }: DocumentUploaderPr
         }, 2000);
       } catch (err: any) {
         console.error("Upload error:", err);
-        setError(err.message || "Failed to upload document");
+        const errorMsg = err.message || "Failed to upload document";
+        console.error("Detailed error:", errorMsg);
+        setError(errorMsg);
       } finally {
         setIsUploading(false);
       }
