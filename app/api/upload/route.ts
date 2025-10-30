@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { analyzeDocument } from '@/lib/claude';
 
 export async function POST(request: NextRequest) {
@@ -44,47 +43,28 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     const base64 = buffer.toString('base64');
 
-    // Create document record in database
-    const document = await prisma.document.create({
-      data: {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        documentType: documentType,
-        status: 'processing',
-      },
-    });
-
     try {
       // Analyze document with Claude
       const extractedData = await analyzeDocument(base64, documentType);
 
-      // Update document with extracted data
-      const updatedDocument = await prisma.document.update({
-        where: { id: document.id },
-        data: {
-          extractedData: extractedData,
-          processedAt: new Date(),
-          status: 'completed',
-        },
-      });
+      // Create a mock document object (without database)
+      const document = {
+        id: `doc_${Date.now()}`,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        documentType: documentType,
+        uploadedAt: new Date().toISOString(),
+        processedAt: new Date().toISOString(),
+        status: 'completed',
+        extractedData: extractedData,
+      };
 
       return NextResponse.json({
         success: true,
-        document: updatedDocument,
+        document: document,
       });
     } catch (error: any) {
-      // Update document status to failed
-      await prisma.document.update({
-        where: { id: document.id },
-        data: {
-          status: 'failed',
-          extractedData: {
-            error: error.message || 'Failed to process document',
-          },
-        },
-      });
-
       console.error('Document processing error:', error);
 
       return NextResponse.json(
@@ -100,28 +80,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to upload document',
-        details: error.message,
-      },
-      { status: 500 }
-    );
-  }
-}
-
-// Get all documents
-export async function GET() {
-  try {
-    const documents = await prisma.document.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return NextResponse.json({ documents });
-  } catch (error: any) {
-    console.error('Fetch documents error:', error);
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch documents',
         details: error.message,
       },
       { status: 500 }

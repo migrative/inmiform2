@@ -2,66 +2,58 @@
 
 An AI-powered React application for processing identity documents (passports, birth certificates, IDs) using Claude AI to extract information for USCIS immigration forms.
 
-## Features
+## ✨ Features
 
 - **PDF Document Upload**: Drag-and-drop interface for uploading PDF documents
 - **AI-Powered OCR**: Uses Claude 3.5 Sonnet to analyze and extract information from documents
 - **Multiple Document Types**: Supports passports, birth certificates, national IDs, and driver licenses
 - **Structured Data Extraction**: Automatically extracts relevant fields based on document type
-- **Database Storage**: Stores documents and extracted data in PostgreSQL
 - **Export Functionality**: Download extracted data as JSON
+- **No Database Required**: Processes documents in memory for instant results
 
-## Tech Stack
+## 🛠 Tech Stack
 
 - **Frontend**: Next.js 15, React 18, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes
 - **AI**: Anthropic Claude 3.5 Sonnet API
-- **Database**: PostgreSQL with Prisma ORM
 - **File Handling**: react-dropzone
 
-## Prerequisites
+## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
+Before you begin, ensure you have:
 
 - Node.js 18+ and npm
-- PostgreSQL database
 - Anthropic API key ([Get one here](https://console.anthropic.com/))
 
-## Setup Instructions
+## 🚀 Quick Start
 
-### 1. Install Dependencies
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/migrative/inmiform2.git
+cd inmiform2
+git checkout claude/inmiform-pdf-upload-ocr-011CUcg4Doen4ngdNtm4trx1
+```
+
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Configure Environment Variables
+### 3. Configure Environment Variables
 
-Copy the example environment file and update it with your credentials:
+Create a `.env` file in the root directory:
 
 ```bash
+# Option 1: Copy from example
 cp .env.example .env
 ```
 
-Edit `.env` and add your credentials:
+Then edit `.env` and add your Anthropic API key:
 
 ```env
-# Anthropic Claude API
 ANTHROPIC_API_KEY=your_actual_api_key_here
-
-# Database (update with your PostgreSQL credentials)
-DATABASE_URL="postgresql://username:password@localhost:5432/inmiform2?schema=public"
-```
-
-### 3. Set Up Database
-
-Create a PostgreSQL database named `inmiform2` (or your preferred name matching the DATABASE_URL).
-
-Then run Prisma migrations to create the database schema:
-
-```bash
-npx prisma generate
-npx prisma db push
 ```
 
 ### 4. Run Development Server
@@ -70,9 +62,15 @@ npx prisma db push
 npm run dev
 ```
 
+### 5. Open in Browser
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Usage
+🎉 **That's it!** The application is ready to use.
+
+---
+
+## 📱 Usage
 
 1. **Select Document Type**: Choose the type of document you're uploading (Passport, Birth Certificate, National ID, or Driver License)
 
@@ -82,13 +80,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - Upload the document
    - Send it to Claude AI for analysis
    - Extract structured information
-   - Store results in the database
+   - Display results instantly
 
 4. **View Results**: Extracted information will be displayed in a structured format
 
 5. **Export Data**: Click "Export as JSON" to download the extracted data
 
-## Supported Documents
+---
+
+## 📄 Supported Documents
 
 ### Passport
 Extracts: Full name, date of birth, place of birth, nationality, passport number, issue/expiration dates, issuing authority, gender, visa stamps
@@ -99,7 +99,9 @@ Extracts: Full name, date of birth, place of birth, parents' names, registration
 ### National ID / Driver License
 Extracts: Full name, date of birth, ID/license number, issue/expiration dates, address, gender
 
-## API Endpoints
+---
+
+## 🔧 API Endpoints
 
 ### POST `/api/upload`
 Upload and process a document
@@ -113,55 +115,31 @@ Upload and process a document
 {
   "success": true,
   "document": {
-    "id": "...",
+    "id": "doc_1234567890",
     "fileName": "passport.pdf",
     "documentType": "passport",
     "status": "completed",
-    "extractedData": { ... },
+    "extractedData": {
+      "full_name": "John Doe",
+      "date_of_birth": "1990-01-01",
+      "passport_number": "AB1234567",
+      "confidence": "high"
+    },
     "processedAt": "2024-01-01T00:00:00.000Z"
   }
 }
 ```
 
-### GET `/api/upload`
-Retrieve all uploaded documents
+---
 
-**Response**:
-```json
-{
-  "documents": [...]
-}
-```
-
-## Database Schema
-
-```prisma
-model Document {
-  id              String   @id @default(cuid())
-  fileName        String
-  fileSize        Int
-  fileType        String
-  documentType    String
-  uploadedAt      DateTime @default(now())
-  processedAt     DateTime?
-  status          String   @default("pending")
-  extractedData   Json?
-  filePath        String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-```
-
-## Development
-
-### Project Structure
+## 📂 Project Structure
 
 ```
 inmiform2/
 ├── app/
 │   ├── api/
 │   │   └── upload/
-│   │       └── route.ts          # Upload and processing API
+│   │       └── route.ts          # Upload and processing API (no DB)
 │   ├── globals.css               # Global styles
 │   ├── layout.tsx                # Root layout
 │   └── page.tsx                  # Main page
@@ -169,12 +147,15 @@ inmiform2/
 │   ├── DocumentUploader.tsx      # Upload component with drag-and-drop
 │   └── DocumentViewer.tsx        # Display extracted data
 ├── lib/
-│   ├── claude.ts                 # Claude API integration
-│   └── db.ts                     # Prisma client singleton
-├── prisma/
-│   └── schema.prisma             # Database schema
-└── package.json
+│   └── claude.ts                 # Claude API integration
+├── .env                          # Environment variables (your API key)
+├── package.json
+└── README.md
 ```
+
+---
+
+## 🎨 Development
 
 ### Scripts
 
@@ -183,7 +164,17 @@ inmiform2/
 - `npm start` - Start production server
 - `npm run lint` - Run ESLint
 
-## Security Notes
+### Environment Variables
+
+The only required environment variable is:
+
+```env
+ANTHROPIC_API_KEY=your_api_key_here
+```
+
+---
+
+## 🔒 Security Notes
 
 - API keys should never be committed to version control
 - The `.env` file is gitignored by default
@@ -191,30 +182,16 @@ inmiform2/
 - Add rate limiting for API routes
 - Validate and sanitize all user inputs
 
-## Future Enhancements
+---
 
-- [ ] User authentication and multi-user support
-- [ ] Document versioning and history
-- [ ] Direct form filling for USCIS forms
-- [ ] Support for image files (JPG, PNG)
-- [ ] Batch document processing
-- [ ] Document comparison and validation
-- [ ] Enhanced error handling and retry logic
-- [ ] Document preview before processing
-
-## Troubleshooting
-
-### Prisma Connection Issues
-If you encounter database connection errors, ensure:
-- PostgreSQL is running
-- DATABASE_URL is correct in `.env`
-- Database exists and is accessible
+## 🐛 Troubleshooting
 
 ### Claude API Errors
 If document processing fails:
-- Verify ANTHROPIC_API_KEY is valid
-- Check API rate limits
+- Verify `ANTHROPIC_API_KEY` is valid and correctly set in `.env`
+- Check API rate limits on your Anthropic account
 - Ensure PDF is not corrupted and under 10MB
+- Check console for detailed error messages
 
 ### Build Errors
 If you encounter build errors:
@@ -224,10 +201,62 @@ npm install
 npm run dev
 ```
 
-## License
+### Port Already in Use
+If port 3000 is already in use:
+```bash
+# Kill process on port 3000 (macOS/Linux)
+lsof -ti:3000 | xargs kill -9
+
+# Or run on a different port
+PORT=3001 npm run dev
+```
+
+---
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+The easiest way to deploy is using Vercel:
+
+1. Push your code to GitHub
+2. Import your repository on [Vercel](https://vercel.com)
+3. Add your `ANTHROPIC_API_KEY` environment variable
+4. Deploy!
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+---
+
+## 🔮 Future Enhancements
+
+- [ ] User authentication and multi-user support
+- [ ] Database integration for document history (optional)
+- [ ] Direct form filling for USCIS forms
+- [ ] Support for image files (JPG, PNG)
+- [ ] Batch document processing
+- [ ] Document comparison and validation
+- [ ] Multi-language support
+- [ ] Document preview before processing
+
+---
+
+## 📝 License
 
 MIT
 
-## Support
+## 💬 Support
 
-For issues or questions, please open an issue on GitHub.
+For issues or questions, please open an issue on [GitHub](https://github.com/migrative/inmiform2/issues).
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Powered by [Anthropic Claude AI](https://www.anthropic.com/)
+- Styled with [Tailwind CSS](https://tailwindcss.com/)
+
+---
+
+**Made with ❤️ for simplifying immigration document processing**
