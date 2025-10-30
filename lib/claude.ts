@@ -51,7 +51,7 @@ Return the extracted data in a clean JSON format with clear field names. If any 
 Also include a "confidence" field (high/medium/low) for the overall extraction quality and a "notes" field for any observations, warnings, or unclear information.`;
 
   const message = await anthropic.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
+    model: 'claude-3-5-sonnet-20240620',
     max_tokens: 4096,
     messages: [
       {
